@@ -11,4 +11,4 @@ services:
     volumes:
       - ./logs/:/app/logs/
     environment:
-      - PORT=13336
+      - CALC_PORT=13336
