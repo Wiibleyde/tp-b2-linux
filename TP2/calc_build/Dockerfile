@@ -9,6 +9,7 @@ COPY src/logs.py ./src/
 
 RUN mkdir -p /app/logs/
 
-EXPOSE 13337
+# Expose the port of the environment variable or 13337 by default
+EXPOSE ${PORT:-13337}
 
-CMD ["python", "main.py", "-p", "13337"]
+CMD ["python", "main.py"]
