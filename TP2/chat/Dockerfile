@@ -4,6 +4,7 @@ WORKDIR /app
 # COPY requirements.txt .
 # RUN python3 -m pip install -r requirements.txt
 RUN pip install websockets
+RUN pip install motor
 
 COPY chat.py .
 COPY src/logs.py ./src/

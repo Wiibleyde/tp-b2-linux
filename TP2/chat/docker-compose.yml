@@ -6,6 +6,8 @@ services:
     image: wiibleyde/chat:latest
     container_name: chat
     restart: always
+    depends_on:
+      - mongo
     ports:
       - 13337:13337
     volumes:
@@ -13,3 +15,12 @@ services:
     environment:
       - CHAT_PORT=13336
       - MAX_USERS=100
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
