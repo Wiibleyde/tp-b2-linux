@@ -119,7 +119,7 @@ if __name__ == '__main__':
             logger.critical("ERROR Le port spécifié n'est pas un port possible (de 0 à 65535).")
             exit(1)
     
-    if 'PORT' in os.environ:
-        args.port = int(os.environ['PORT'])
+    if 'CALC_PORT' in os.environ:
+        args.port = int(os.environ['CALC_PORT'])
 
     listen('127.0.0.1', args.port, 60)

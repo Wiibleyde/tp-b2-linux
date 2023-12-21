@@ -3,12 +3,13 @@ version: '3'
 services:
   bot:
     build: .
-    image: wiibleyde/calculator:latest
-    container_name: calculator
+    image: wiibleyde/chat:latest
+    container_name: chat
     restart: always
     ports:
       - 13337:13337
     volumes:
       - ./logs/:/app/logs/
     environment:
-      - CALC_PORT=13336
+      - CHAT_PORT=13336
+      - MAX_USERS=100
