@@ -18,24 +18,9 @@
 
 # 0. Setup
 
-Munissez-vous de :
-
-- un nouveau dépot sur [l'instance publique de Gitlab](https://gitlab.com)
-- une VM Linux dans VBox sur votre PC
-  - Rocky Linux c'est très bien
-  - on l'appellera `runner.bonus` dans ce TP
-  - elle hébergera le Runner Gitlab
-  - il faudra installer Docker sur cette machine
-- une deuxième VM Linux, accessible depuis Internet
-  - ce sera le "serveur de production"
-  - on l'appellera `prod.bonus` dans ce TP
-  - il faudra installer Docker sur cette machine
-
 # I. Premiers pas CI
 
 ## 1. Préparation runner
-
-➜ **A réaliser sur `runner.bonus`**
 
 🌞 **Préparer un fichier de conf pour le Runner**
 
@@ -89,9 +74,6 @@ shutdown_timeout = 0
 
 🌞 **Créer un fichier `.gitlab-ci.yml`**
 
-- il décrit les étapes à réaliser automatiquement à chaque push
-- utilisez le contenu simpliste suivant :
-
 ```yml
 stages:
   - mon_premier_stage
@@ -104,17 +86,6 @@ mon_premier_stage:
 ```
 
 ## 3. Quelques idées pour la pipeline
-
-➜ **Check de syntaxe**
-
-- genre on pourrait vérifier la conformité PEP8
-
-➜ **Construction d'une image Docker**
-
-- p'tit `docker build` dans un stage de build dédié
-- chaque dépôt Gitlab est équipé d'un registre Docker
-- vous pouvez donc `docker push` l'image dans le registre de votre dépôt
-- Gitlab c'est public, donc n'importe qui peut `git pull` l'image ensuite (un serveur de prod par exemple ?)
 
 # II. Premier déploiement CD
 
@@ -145,10 +116,6 @@ ssh-rsa [...] wiibleyde@NBK-Wiibleyde
 
 ## 2. Déploiement automatique : CD
 
-On va setup un déploiement automatisé : dès qu'on push sur le dépôt Git, une action est effectuée sur le serveur `prod.bonus` à travers une connexion SSH.
-
-Le moyen recommandé pour faire ça c'est d'utiliser un agent SSH (`ssh-agent` et `ssh-add`).
-
 🌞 **Adaptez votre `.gitlab-ci.yml`**
 
 ```yml
@@ -175,8 +142,6 @@ deploy_to_prod:
   script:
     - ssh wiibleyde@creatia whoami
 ```
-
-- confirmez la bonne exécution de votre pipeline depuis la WebUI de Gitlab
 
 ```bash
 [0KRunning with gitlab-runner 16.7.0 (102c81ba)[0;m
