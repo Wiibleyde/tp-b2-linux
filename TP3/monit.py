@@ -153,8 +153,7 @@ def getLast(path: str) -> dict:
     
 def getAvg(path: str, hours: int) -> dict:
     files = glob.glob(path)
-    if len(files) == 0:
-        return {}
+    if len(files) == 0:return {}
     files.sort(key=os.path.getmtime)
     files = files[-hours:]
     ram = 0
@@ -172,12 +171,7 @@ def getAvg(path: str, hours: int) -> dict:
     cpu /= len(files)
     disk /= len(files)
     ports = [True if ports.count(True) > ports.count(False) else False]
-    return {
-        'ram': ram,
-        'cpu': cpu,
-        'disk': disk,
-        'ports': ports
-    }
+    return {'ram': ram,'cpu': cpu,'disk': disk,'ports': ports}
     
 if __name__ == '__main__':
     args = sys.argv[1:]
