@@ -221,3 +221,18 @@ if __name__ == '__main__':
                 print('Usage: python monit.py get avg <hours>')
             else:
                 print(getAvg('save*.json', int(args[2])))
+    else:
+        print('Usage: python monit.py <command> <args>')
+        print('Commands:')
+        for key in cmd:
+            if type(cmd[key]) == str:
+                print(f'\t{key}: {cmd[key]}')
+            else:
+                print(f'\t{key}:')
+                for key2 in cmd[key]:
+                    if type(cmd[key][key2]) == str:
+                        print(f'\t\t{key2}: {cmd[key][key2]}')
+                    else:
+                        print(f'\t\t{key2}:')
+                        for key3 in cmd[key][key2]:
+                            print(f'\t\t\t{key3}: {cmd[key][key2][key3]}')
