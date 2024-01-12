@@ -5,6 +5,7 @@ import socket
 import discord_webhook
 from datetime import datetime
 import glob
+import hashlib
 import sys
 
 cmd = {
@@ -91,15 +92,16 @@ class Save:
             with open(self.path, 'r') as f:
                 self.data = json.loads(f.read())
         else:
-            self.data = []
+            self.data = {}
             self.save()
 
     def save(self):
         with open(self.path, 'w') as f:
-            f.write(json.dumps(self.data))
+            f.write(json.dumps(self.data, separators=(',', ':')))
 
-    def insertSave(self, date: str, ram: int, cpu: int, disk: int, ports: list):
+    def insertSave(self, id:str, date: str, ram: int, cpu: int, disk: int, ports: list):
         report = {
+            'id': id,
             'date': date,
             'report': {
                 'ram': ram,
@@ -108,7 +110,7 @@ class Save:
                 'ports': ports
             }
         }
-        self.data.append(report)
+        self.data = report
         self.save()
 
 def getLevel(value:int) -> int:
@@ -132,7 +134,8 @@ def check():
     save = Save(f'save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ','-')}.json')
     bot = MonitBot(config)
     report = getReport(Monit(), save, config)
-    save.insertSave(nowTime, report[0], report[1], report[2], report[3])
+    uuid = hashlib.md5(str(report).encode()).hexdigest()
+    save.insertSave(uuid, nowTime, report[0], report[1], report[2], report[3])
     ramLevel = getLevel(report[0])
     if ramLevel >= 1:
         bot.alert('RAM au dessus de 80%', ramLevel)
@@ -153,25 +156,29 @@ def getLast(path: str) -> dict:
     
 def getAvg(path: str, hours: int) -> dict:
     files = glob.glob(path)
-    if len(files) == 0:return {}
+    print(files)
+    if len(files) == 0:
+        return {}
     files.sort(key=os.path.getmtime)
+    print(files)
     files = files[-hours:]
-    ram = 0
-    cpu = 0
-    disk = 0
-    ports = []
+    print(files)
+    avg = {
+        'ram': 0,
+        'cpu': 0,
+        'disk': 0,
+    }
     for file in files:
+        print(file)
         with open(file, 'r') as f:
             data = json.loads(f.read())
-            ram += data[0]['report']['ram']
-            cpu += data[0]['report']['cpu']
-            disk += data[0]['report']['disk']
-            ports += data[0]['report']['ports']
-    ram /= len(files)
-    cpu /= len(files)
-    disk /= len(files)
-    ports = [True if ports.count(True) > ports.count(False) else False]
-    return {'ram': ram,'cpu': cpu,'disk': disk,'ports': ports}
+            avg['ram'] += data['report']['ram']
+            avg['cpu'] += data['report']['cpu']
+            avg['disk'] += data['report']['disk']
+    avg['ram'] /= len(files)
+    avg['cpu'] /= len(files)
+    avg['disk'] /= len(files)
+    return avg
     
 if __name__ == '__main__':
     args = sys.argv[1:]
