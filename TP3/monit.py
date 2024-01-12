@@ -57,7 +57,7 @@ class Config:
 
     def save(self):
         with open(self.path, 'w') as f:
-            f.write(json.dumps(self.data))
+            f.write(json.dumps(self.data, indent=4, separators=(',', ': ')))
 
     def get(self, key: str):
         return self.data[key]
@@ -129,7 +129,7 @@ def getReport(monit: Monit, save: Save, config: Config) -> tuple:
     return (ram, cpu, disk, ports)
 
 def check():
-    nowTime = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    nowTime = datetime.now().timestamp()
     config = Config('config.json')
     save = Save(f'save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ','-')}.json')
     bot = MonitBot(config)
@@ -144,7 +144,7 @@ def check():
         bot.alert('CPU au dessus de 80%', cpuLevel)
     diskLevel = getLevel(report[2])
     if diskLevel >= 1:
-        bot.alert('Disk au dessus de 80%', diskLevel)
+        bot.alert('Disque au dessus de 80%', diskLevel)
 
 def getLast(path: str) -> dict:
     files = glob.glob(path)
@@ -193,6 +193,9 @@ if __name__ == '__main__':
                         print(f'\t\t{key2}:')
                         for key3 in cmd[key][key2]:
                             print(f'\t\t\t{key3}: {cmd[key][key2][key3]}')
+    elif args[0] == 'init':
+        config = Config('config.json')
+        config.save()
     elif args[0] == 'check':
         check()
     elif args[0] == 'list':
