@@ -156,20 +156,16 @@ def getLast(path: str) -> dict:
     
 def getAvg(path: str, hours: int) -> dict:
     files = glob.glob(path)
-    print(files)
     if len(files) == 0:
         return {}
     files.sort(key=os.path.getmtime)
-    print(files)
     files = files[-hours:]
-    print(files)
     avg = {
         'ram': 0,
         'cpu': 0,
         'disk': 0,
     }
     for file in files:
-        print(file)
         with open(file, 'r') as f:
             data = json.loads(f.read())
             avg['ram'] += data['report']['ram']
