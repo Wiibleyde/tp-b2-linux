@@ -8,6 +8,9 @@ import glob
 import hashlib
 import sys
 
+SAVE_FOLDER = '/var/monit'
+USER = 'monit'
+
 cmd = {
     'check': 'Check les valeurs de RAM, CPU, Disques et Ports ouverts',
     'list': 'Liste des rapports',
@@ -116,7 +119,7 @@ class Save:
 class Calls:
     def requestCheck():
         check()
-        last = getLast('save*.json')
+        last = getLast(SAVE_FOLDER + '/save*.json')
         return {
             'ram': last['report']['ram'],
             'cpu': last['report']['cpu'],
@@ -125,10 +128,10 @@ class Calls:
         }
     
     def requestLast():
-        return getLast('save*.json')
+        return getLast(SAVE_FOLDER + '/save*.json')
     
     def requestAvg(hours: int):
-        return getAvg('save*.json', hours)
+        return getAvg(SAVE_FOLDER + '/save*.json', hours)
 
 def getLevel(value:int) -> int:
     if value > 90:
@@ -150,7 +153,7 @@ def getReport(monit: Monit, save: Save, config: Config) -> tuple:
 def check():
     nowTime = datetime.now().timestamp()
     config = Config('config.json')
-    save = Save(f'save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ','-')}.json')
+    save = Save(f'{SAVE_FOLDER}/save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ','-')}.json')
     bot = MonitBot(config)
     report = getReport(Monit(), save, config)
     uuid = hashlib.md5(str(report).encode()).hexdigest()
@@ -216,12 +219,11 @@ if __name__ == '__main__':
                         for key3 in cmd[key][key2]:
                             print(f'\t\t\t{key3}: {cmd[key][key2][key3]}')
     elif args[0] == 'init':
-        config = Config('config.json')
-        config.save()
+        print('To init the folder, please run the init.sh script')
     elif args[0] == 'check':
         check()
     elif args[0] == 'list':
-        files = glob.glob('save*.json')
+        files = glob.glob(SAVE_FOLDER + '/save*.json')
         files.sort(key=os.path.getmtime)
         for file in files:
             print(file)
@@ -237,12 +239,12 @@ if __name__ == '__main__':
                     for key2 in cmd['get'][key]:
                         print(f'\t\t{key2}: {cmd["get"][key][key2]}')
         elif args[1] == 'last':
-            print(getLast('save*.json'))
+            print(getLast(SAVE_FOLDER + '/save*.json'))
         elif args[1] == 'avg':
             if len(args) == 2:
                 print('Usage: python monit.py get avg <hours>')
             else:
-                print(getAvg('save*.json', int(args[2])))
+                print(getAvg(SAVE_FOLDER + '/save*.json', int(args[2])))
     else:
         print('Usage: python monit.py <command> <args>')
         print('Commands:')
