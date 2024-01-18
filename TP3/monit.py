@@ -99,7 +99,7 @@ class Save:
         with open(self.path, 'w') as f:
             f.write(json.dumps(self.data, separators=(',', ':')))
 
-    def insertSave(self, id:str, date: str, ram: int, cpu: int, disk: int, ports: list):
+    def insertSave(self, id:str, date: str, ram: int, cpu: int, disk: int, ports: dict):
         report = {
             'id': id,
             'date': date,
@@ -125,7 +125,9 @@ def getReport(monit: Monit, save: Save, config: Config) -> tuple:
     ram = monit.checkRam()
     cpu = monit.checkCpu()
     disk = monit.checkDisk()
-    ports = [monit.checkOpenPort(port) for port in config.get('tcp_ports')]
+    ports = {}
+    for port in config.get('tcp_ports'):
+        ports[port] = monit.checkOpenPort(port)
     return (ram, cpu, disk, ports)
 
 def check():
@@ -174,6 +176,9 @@ def getAvg(path: str, hours: int) -> dict:
     avg['ram'] /= len(files)
     avg['cpu'] /= len(files)
     avg['disk'] /= len(files)
+    avg['ram'] = round(avg['ram'], 2)
+    avg['cpu'] = round(avg['cpu'], 2)
+    avg['disk'] = round(avg['disk'], 2)
     return avg
     
 if __name__ == '__main__':
