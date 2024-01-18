@@ -113,6 +113,23 @@ class Save:
         self.data = report
         self.save()
 
+class Calls:
+    def requestCheck():
+        check()
+        last = getLast('save*.json')
+        return {
+            'ram': last['report']['ram'],
+            'cpu': last['report']['cpu'],
+            'disk': last['report']['disk'],
+            'ports': last['report']['ports']
+        }
+    
+    def requestLast():
+        return getLast('save*.json')
+    
+    def requestAvg(hours: int):
+        return getAvg('save*.json', hours)
+
 def getLevel(value:int) -> int:
     if value > 90:
         return 2
