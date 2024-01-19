@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import psutil
 import json
 import os
@@ -117,7 +118,7 @@ class Save:
         self.save()
 
 class Calls:
-    def requestCheck():
+    async def requestCheck():
         check()
         last = getLast(SAVE_FOLDER + '/save*.json')
         return {
@@ -132,6 +133,16 @@ class Calls:
     
     def requestAvg(hours: int):
         return getAvg(SAVE_FOLDER + '/save*.json', hours)
+    
+    def requestReport(id: str):
+        files = glob.glob(SAVE_FOLDER + '/save*.json')
+        files.sort(key=os.path.getmtime)
+        for file in files:
+            with open(file, 'r') as f:
+                data = json.loads(f.read())
+                if data['id'] == id:
+                    return data
+        return None
 
 def getLevel(value:int) -> int:
     if value > 90:
