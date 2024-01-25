@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    image: wiibleyde/monit:latest
+    container_name: monit
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - /proc:/host/proc:ro
+      - /var/monit:/var/monit

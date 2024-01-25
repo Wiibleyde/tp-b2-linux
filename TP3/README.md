@@ -25,19 +25,10 @@ Then, you can run the app:
 
 ### To start a check
 ```bash
-python3 app.py check
+docker compose up
 ```
 
-### To get last check result
-```bash
-python3 app.py get last
-```
-
-### To get average for a specific period (In hours)
-```bash
-python3 app.py get avg X
-```
-- X: Number of hours
+You can now access the app on http://localhost:5000/apidocs/ to look at the API documentation.
 
 # Happy monitoring
 ![meme](https://media.makeameme.org/created/no-worries-its-5bb659.jpg)
