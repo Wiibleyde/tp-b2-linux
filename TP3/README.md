@@ -6,7 +6,7 @@ This is a simple monitoring app that can be used to monitor the status of a serv
 
 ## Installation
 
-To install the app, you need to have python3 installed on your machine. 
+To install the app, you need to have python3 and docker installed on your machine.
 
 Then, you need to install the requirements using the following command:
 
