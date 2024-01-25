@@ -118,7 +118,7 @@ class Save:
         self.save()
 
 class Calls:
-    async def requestCheck():
+    def requestCheck():
         check()
         last = getLast(SAVE_FOLDER + '/save*.json')
         return {
@@ -127,6 +127,15 @@ class Calls:
             'disk': last['report']['disk'],
             'ports': last['report']['ports']
         }
+    
+    def requestReports():
+        files = glob.glob(SAVE_FOLDER + '/save*.json')
+        files.sort(key=os.path.getmtime)
+        reports = []
+        for file in files:
+            with open(file, 'r') as f:
+                reports.append(json.loads(f.read()))
+        return reports
     
     def requestLast():
         return getLast(SAVE_FOLDER + '/save*.json')

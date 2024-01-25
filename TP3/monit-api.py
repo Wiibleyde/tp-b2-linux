@@ -29,6 +29,20 @@ def requestCheck():
     Calls.requestCheck()
     return {"status": "ok"}
 
+@app.route("/reports", methods=["GET"])
+def requestReports():
+    """
+    The reports endpoint
+    ---
+    responses:
+      200:
+        description: Reports
+    """
+    reports = Calls.requestReports()
+    if reports is None:
+        return {"error": "No report found"}, 404
+    return reports
+
 @app.route("/reports/latest", methods=["GET"])
 def requestLast():
     """
