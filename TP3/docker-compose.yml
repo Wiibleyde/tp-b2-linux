@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  bot:
+  monit:
     build: .
     image: wiibleyde/monit:latest
     container_name: monit
