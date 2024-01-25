@@ -9,7 +9,7 @@ import glob
 import hashlib
 import sys
 
-SAVE_FOLDER = '/var/monit'
+SAVE_FOLDER = './monit-saves'
 USER = 'monit'
 
 cmd = {
