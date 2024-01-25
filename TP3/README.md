@@ -21,6 +21,15 @@ To use the app, you need to run create the configuration file using the followin
 python3 app.py init
 ```
 
+This will create a configuration file in the current directory. You can then edit the configuration file to add the servers you want to monitor.
+Example of configuration file : 
+```json
+{
+    "tcp_ports": [80, 443, 5000, 8080, 8081, 8082, 8083, 8084, 8085, 8086],
+    "webhook_url": ""
+}
+```
+
 Then, you can run the app:
 
 ### To start a check
