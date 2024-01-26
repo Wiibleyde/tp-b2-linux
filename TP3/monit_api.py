@@ -123,7 +123,7 @@ def page_not_found(e):
     Returns:
         json: Error message
     """
-    return {"error": "404","message":e}, 404
+    return {"error": "404", "message": e}, 404
 
 
 @app.errorhandler(500)
@@ -136,7 +136,7 @@ def internal_server_error(e):
     Returns:
         json: Error message
     """
-    return {"error": "500","message":e}, 500
+    return {"error": "500", "message": e}, 500
 
 
 @app.errorhandler(405)
@@ -149,7 +149,7 @@ def method_not_allowed(e):
     Returns:
         json: Error message
     """
-    return {"error": "405","message":e}, 405
+    return {"error": "405", "message": e}, 405
 
 
 if __name__ == "__main__":
