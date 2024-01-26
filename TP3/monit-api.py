@@ -6,6 +6,7 @@ from monit import Calls
 app = Flask(__name__)
 swagger = Swagger(app)
 
+
 @app.route("/status", methods=["GET"])
 def status():
     """
@@ -16,6 +17,7 @@ def status():
         description: Status OK
     """
     return {"status": "ok"}
+
 
 @app.route("/run/check", methods=["GET"])
 def requestCheck():
@@ -28,6 +30,7 @@ def requestCheck():
     """
     Calls.requestCheck()
     return {"status": "ok"}
+
 
 @app.route("/reports", methods=["GET"])
 def requestReports():
@@ -43,6 +46,7 @@ def requestReports():
         return {"error": "No report found"}, 404
     return reports
 
+
 @app.route("/reports/latest", methods=["GET"])
 def requestLast():
     """
@@ -56,6 +60,7 @@ def requestLast():
     if last is None:
         return {"error": "No report found"}, 404
     return last
+
 
 @app.route("/reports/<string:id>", methods=["GET"])
 def requestReport(id):
@@ -77,6 +82,7 @@ def requestReport(id):
         return {"error": "No report found"}, 404
     return report
 
+
 @app.route("/reports/avg/<int:hours>", methods=["GET"])
 def requestAvg(hours):
     """
@@ -97,17 +103,21 @@ def requestAvg(hours):
         return {"error": "No report found"}, 404
     return avg
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return {"error": "404"}, 404
+
 
 @app.errorhandler(500)
 def internal_server_error(e):
     return {"error": "500"}, 500
 
+
 @app.errorhandler(405)
 def method_not_allowed(e):
     return {"error": "405"}, 405
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

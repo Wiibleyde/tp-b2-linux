@@ -28,22 +28,24 @@ default_config = {
     'webhook_url': ''
 }
 
+
 class Monit:
     def checkRam(self) -> int:
         return psutil.virtual_memory().percent
-    
+
     def checkCpu(self) -> int:
         return psutil.cpu_percent()
-    
+
     def checkDisk(self) -> int:
         return psutil.disk_usage('/').percent
-    
+
     def checkOpenPort(self, port: int) -> bool:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(1)
         result = sock.connect_ex(('127.0.0.1', port))
         sock.close()
         return result == 0
+
 
 class Config:
     def __init__(self, path: str):
@@ -65,25 +67,29 @@ class Config:
 
     def get(self, key: str):
         return self.data[key]
-    
+
     def set(self, key: str, value):
         self.data[key] = value
         self.save()
+
 
 class MonitBot:
     def __init__(self, config: Config):
         self.config = config
         self.monit = Monit()
-        self.webhook = discord_webhook.DiscordWebhook(url=self.config.get('webhook_url'), content='')
+        self.webhook = discord_webhook.DiscordWebhook(
+            url=self.config.get('webhook_url'), content='')
 
     def alert(self, message: str, level: int):
-        embed = discord_webhook.DiscordEmbed(title='Alerte', description=message, color=0xffffff)
+        embed = discord_webhook.DiscordEmbed(
+            title='Alerte', description=message, color=0xffffff)
         if level == 1:
             embed.color = 0xff0000
         elif level == 2:
             embed.color = 0xffff00
         self.webhook.add_embed(embed)
         self.webhook.execute()
+
 
 class Save:
     def __init__(self, path: str):
@@ -103,7 +109,7 @@ class Save:
         with open(self.path, 'w') as f:
             f.write(json.dumps(self.data, separators=(',', ':')))
 
-    def insertSave(self, id:str, date: str, ram: int, cpu: int, disk: int, ports: dict):
+    def insertSave(self, id: str, date: str, ram: int, cpu: int, disk: int, ports: dict):
         report = {
             'id': id,
             'date': date,
@@ -117,6 +123,7 @@ class Save:
         self.data = report
         self.save()
 
+
 class Calls:
     def requestCheck():
         check()
@@ -127,7 +134,7 @@ class Calls:
             'disk': last['report']['disk'],
             'ports': last['report']['ports']
         }
-    
+
     def requestReports():
         files = glob.glob(SAVE_FOLDER + '/save*.json')
         files.sort(key=os.path.getmtime)
@@ -136,13 +143,13 @@ class Calls:
             with open(file, 'r') as f:
                 reports.append(json.loads(f.read()))
         return reports
-    
+
     def requestLast():
         return getLast(SAVE_FOLDER + '/save*.json')
-    
+
     def requestAvg(hours: int):
         return getAvg(SAVE_FOLDER + '/save*.json', hours)
-    
+
     def requestReport(id: str):
         files = glob.glob(SAVE_FOLDER + '/save*.json')
         files.sort(key=os.path.getmtime)
@@ -153,13 +160,15 @@ class Calls:
                     return data
         return None
 
-def getLevel(value:int) -> int:
+
+def getLevel(value: int) -> int:
     if value > 90:
         return 2
     elif value > 80:
         return 1
     else:
         return 0
+
 
 def getReport(monit: Monit, save: Save, config: Config) -> tuple:
     ram = monit.checkRam()
@@ -170,10 +179,12 @@ def getReport(monit: Monit, save: Save, config: Config) -> tuple:
         ports[port] = monit.checkOpenPort(port)
     return (ram, cpu, disk, ports)
 
+
 def check():
     nowTime = datetime.now().timestamp()
     config = Config('config.json')
-    save = Save(f'{SAVE_FOLDER}/save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ','-')}.json')
+    save = Save(
+        f'{SAVE_FOLDER}/save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ', '-')}.json')
     bot = MonitBot(config)
     report = getReport(Monit(), save, config)
     uuid = hashlib.md5(str(report).encode()).hexdigest()
@@ -188,6 +199,7 @@ def check():
     if diskLevel >= 1:
         bot.alert('Disque au dessus de 80%', diskLevel)
 
+
 def getLast(path: str) -> dict:
     files = glob.glob(path)
     if len(files) == 0:
@@ -195,7 +207,8 @@ def getLast(path: str) -> dict:
     files.sort(key=os.path.getmtime)
     with open(files[-1], 'r') as f:
         return json.loads(f.read())
-    
+
+
 def getAvg(path: str, hours: int) -> dict:
     files = glob.glob(path)
     if len(files) == 0:
@@ -220,7 +233,8 @@ def getAvg(path: str, hours: int) -> dict:
     avg['cpu'] = round(avg['cpu'], 2)
     avg['disk'] = round(avg['disk'], 2)
     return avg
-    
+
+
 if __name__ == '__main__':
     args = sys.argv[1:]
     if len(args) == 0:
