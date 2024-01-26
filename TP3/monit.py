@@ -83,7 +83,7 @@ class Config:
     def load(self):
         """Load the config file"""
         if path.exists(self.file_path):
-            with open(self.file_path, "r", encoding='utf8') as f:
+            with open(self.file_path, "r", encoding="utf-8") as f:
                 self.data = json.loads(f.read())
         else:
             self.data = default_config
@@ -91,14 +91,14 @@ class Config:
 
     def save(self):
         """Save the config file"""
-        with open(self.file_path, "w", encoding='utf8') as f:
+        with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(self.data, indent=4, separators=(",", ": ")))
 
     def get(self, key_wanted: str):
         """Get a value from the config
 
         Args:
-            key (str): Key to get
+            key_wanted (str): Key to get
 
         Returns:
             Any: Value of the key
@@ -106,6 +106,12 @@ class Config:
         return self.data[key_wanted]
 
     def set(self, key_wanted: str, value):
+        """Set a value in the config
+
+        Args:
+            key (str): Key to set
+            value (Any): Value to set
+        """
         self.data[key_wanted] = value
         self.save()
 
@@ -119,6 +125,9 @@ class MonitBot:
         self.webhook = discord_webhook.DiscordWebhook(
             url=self.config.get("webhook_url"), content=""
         )
+
+    def __str__(self):
+        return f"MonitBot({self.config})"
 
     def alert(self, message: str, level: int):
         """Send an alert to the discord webhook
@@ -137,7 +146,6 @@ class MonitBot:
         self.webhook.add_embed(embed)
         self.webhook.execute()
 
-
 class Save:
     """Save class"""
 
@@ -149,7 +157,7 @@ class Save:
     def load(self):
         """Load the save file"""
         if path.exists(self.file_path):
-            with open(self.file_path, "r", encoding='utf8') as f:
+            with open(self.file_path, "r", encoding="utf-8") as f:
                 self.data = json.loads(f.read())
         else:
             self.data = {}
@@ -157,16 +165,14 @@ class Save:
 
     def save(self):
         """Save the save file"""
-        with open(self.file_path, "w", encoding='utf8') as f:
+        with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(self.data, separators=(",", ":")))
 
-    def insert_save(
-        self, id: str, date: str, ram: int, cpu: int, disk: int, ports: dict
-    ):
+    def insert_save(self, id_report: str, date: str, ram: int, cpu: int, disk: int, ports: dict):
         """Insert a new save
 
         Args:
-            id (str): ID of the save
+            id_report (str): ID of the save
             date (str): Date of the save
             ram (int): RAM usage
             cpu (int): CPU usage
@@ -174,7 +180,7 @@ class Save:
             ports (dict): Open ports
         """
         report = {
-            "id": id,
+            "id": id_report,
             "date": date,
             "report": {"ram": ram, "cpu": cpu, "disk": disk, "ports": ports},
         }
@@ -183,9 +189,12 @@ class Save:
 
 
 class Calls:
-    """Calls class
-    """
-    def request_check():
+    """Calls class"""
+
+    def __init__(self):
+        pass
+
+    def request_check(self=None):
         """Request a check
 
         Returns:
@@ -200,21 +209,21 @@ class Calls:
             "ports": last["report"]["ports"],
         }
 
-    def request_reports():
+    def request_reports(self):
         """Request all reports
 
         Returns:
             list: List of reports
         """
-        files = glob.glob(SAVE_FOLDER + "/save*.json")
-        files.sort(key=path.getmtime)
+        files_listed = glob.glob(SAVE_FOLDER + "/save*.json")
+        files_listed.sort(key=path.getmtime)
         reports = []
-        for file in files:
-            with open(file, "r") as f:
+        for file_element in files_listed:
+            with open(file_element, "r", encoding='utf8') as f:
                 reports.append(json.loads(f.read()))
         return reports
 
-    def request_last():
+    def request_last(self):
         """Request the last report
 
         Returns:
@@ -222,7 +231,7 @@ class Calls:
         """
         return get_last(SAVE_FOLDER + "/save*.json")
 
-    def request_avg(hours: int):
+    def request_avg(self, hours: int):
         """Request the average of the last X hours
 
         Args:
@@ -233,21 +242,21 @@ class Calls:
         """
         return get_avg(SAVE_FOLDER + "/save*.json", hours)
 
-    def request_report(id: str):
+    def request_report(self, id_wanted: str):
         """Request a report by ID
 
         Args:
-            id (str): ID of the report
+            id_wanted (str): ID of the report
 
         Returns:
             dict: Report
         """
-        files = glob.glob(SAVE_FOLDER + "/save*.json")
-        files.sort(key=path.getmtime)
-        for file in files:
-            with open(file, "r") as f:
+        files_listed = glob.glob(SAVE_FOLDER + "/save*.json")
+        files_listed.sort(key=path.getmtime)
+        for file_element in files_listed:
+            with open(file_element, "r", encoding='utf8') as f:
                 data = json.loads(f.read())
-                if data["id"] == id:
+                if data["id"] == id_wanted:
                     return data
         return None
 
@@ -268,35 +277,35 @@ def get_level(value: int) -> int:
     return 0
 
 
-def get_report(monit: Monit, save: Save, config: Config) -> tuple:
+def get_report(monit: Monit, config: Config) -> tuple:
     """Get a report
 
     Args:
         monit (Monit): Monit instance
-        save (Save): Save instance
         config (Config): Config instance
 
     Returns:
         tuple: Report
     """
-    ram = monit.checkRam()
-    cpu = monit.checkCpu()
-    disk = monit.checkDisk()
+    ram = monit.check_ram()
+    cpu = monit.check_cpu()
+    disk = monit.check_disk()
     ports = {}
     for port in config.get("tcp_ports"):
-        ports[port] = monit.checkOpenPort(port)
+        ports[port] = monit.check_open_port(port)
     return (ram, cpu, disk, ports)
 
 
 def check():
     """Check the values"""
     now_time = datetime.now().timestamp()
+    now_time_step = datetime.fromtimestamp(now_time)
+    now_time_step = now_time_step.strftime("%d-%m-%Y %H:%M:%S")
+    now_time_formated = now_time_step.replace(" ", "-")
     config = Config("config.json")
-    save = Save(
-        f'{SAVE_FOLDER}/save{datetime.now().strftime('%d-%m-%Y %H:%M:%S').replace(' ', '-')}.json'
-    )
+    save = Save(f"{SAVE_FOLDER}/save{now_time_formated}.json")
     bot = MonitBot(config)
-    report = get_report(Monit(), save, config)
+    report = get_report(Monit(), config)
     uuid = hashlib.md5(str(report).encode()).hexdigest()
     save.insert_save(uuid, now_time, report[0], report[1], report[2], report[3])
     ram_level = get_level(report[0])
@@ -310,24 +319,24 @@ def check():
         bot.alert("Disque au dessus de 80%", disk_level)
 
 
-def get_last(path: str) -> dict:
+def get_last(files_path: str) -> dict:
     """Get the last report
 
     Args:
-        path (str): Path to the reports
+        files_path (str): Path to the reports
 
     Returns:
         dict: Last report
     """
-    files = glob.glob(path)
-    if len(files) == 0:
+    files_listed = glob.glob(files_path)
+    if len(files_listed) == 0:
         return {}
-    files.sort(key=path.getmtime)
-    with open(files[-1], "r") as f:
+    files_listed.sort(key=path.getmtime)
+    with open(files_listed[-1], "r",encoding='utf8') as f:
         return json.loads(f.read())
 
 
-def get_avg(path: str, hours: int) -> dict:
+def get_avg(files_path: str, hours: int) -> dict:
     """Get the average of the last X hours
 
     Args:
@@ -337,25 +346,25 @@ def get_avg(path: str, hours: int) -> dict:
     Returns:
         dict: Average report
     """
-    files = glob.glob(path)
-    if len(files) == 0:
+    files_listed = glob.glob(files_path)
+    if len(files_listed) == 0:
         return {}
-    files.sort(key=path.getmtime)
-    files = files[-hours:]
+    files_listed.sort(key=path.getmtime)
+    files_listed = files_listed[-hours:]
     avg = {
         "ram": 0,
         "cpu": 0,
         "disk": 0,
     }
-    for file in files:
-        with open(file, "r", encoding='utf8') as f:
+    for file_element in files_listed:
+        with open(file_element, "r", encoding="utf-8") as f:
             data = json.loads(f.read())
             avg["ram"] += data["report"]["ram"]
             avg["cpu"] += data["report"]["cpu"]
             avg["disk"] += data["report"]["disk"]
-    avg["ram"] /= len(files)
-    avg["cpu"] /= len(files)
-    avg["disk"] /= len(files)
+    avg["ram"] /= len(files_listed)
+    avg["cpu"] /= len(files_listed)
+    avg["disk"] /= len(files_listed)
     avg["ram"] = round(avg["ram"], 2)
     avg["cpu"] = round(avg["cpu"], 2)
     avg["disk"] = round(avg["disk"], 2)
@@ -368,12 +377,12 @@ if __name__ == "__main__":
         print("Usage: python monit.py <command> <args>")
         print("Commands:")
         for key in cmd.items():
-            if isinstance(cmd[key],str):
+            if isinstance(cmd[key], str):
                 print(f"\t{key}: {cmd[key]}")
             else:
                 print(f"\t{key}:")
                 for key2 in cmd[key]:
-                    if isinstance(cmd[key][key2],str):
+                    if isinstance(cmd[key][key2], str):
                         print(f"\t\t{key2}: {cmd[key][key2]}")
                     else:
                         print(f"\t\t{key2}:")
@@ -393,7 +402,7 @@ if __name__ == "__main__":
             print("Usage: python monit.py get <command> <args>")
             print("Commands:")
             for key in cmd["get"]:
-                if isinstance(cmd["get"][key],str):
+                if isinstance(cmd["get"][key], str):
                     print(f'\t{key}: {cmd["get"][key]}')
                 else:
                     print(f"\t{key}:")
@@ -410,12 +419,12 @@ if __name__ == "__main__":
         print("Usage: python monit.py <command> <args>")
         print("Commands:")
         for key in cmd.items():
-            if isinstance(cmd[key],str):
+            if isinstance(cmd[key], str):
                 print(f"\t{key}: {cmd[key]}")
             else:
                 print(f"\t{key}:")
                 for key2 in cmd[key]:
-                    if isinstance(cmd[key][key2],str):
+                    if isinstance(cmd[key][key2], str):
                         print(f"\t\t{key2}: {cmd[key][key2]}")
                     else:
                         print(f"\t\t{key2}:")
